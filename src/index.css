@@ -1,0 +1,315 @@
+@import "tailwindcss";
+
+/* =========================================================
+   THEME
+   ========================================================= */
+
+@theme {
+  /* ---------------------------------------------------------
+     Primary Colors
+     --------------------------------------------------------- */
+
+  --color-primary-50: #eff6ff;
+  --color-primary-100: #dbeafe;
+  --color-primary-200: #bfdbfe;
+  --color-primary-300: #93c5fd;
+  --color-primary-400: #60a5fa;
+  --color-primary-500: #3b82f6;
+  --color-primary-600: #2563eb;
+  --color-primary-700: #1d4ed8;
+  --color-primary-800: #1e40af;
+  --color-primary-900: #1e3a8a;
+
+  /* ---------------------------------------------------------
+     Accent Colors
+     --------------------------------------------------------- */
+
+  --color-accent-50: #f0fdf4;
+  --color-accent-100: #dcfce7;
+  --color-accent-200: #bbf7d0;
+  --color-accent-300: #86efac;
+  --color-accent-400: #4ade80;
+  --color-accent-500: #22c55e;
+  --color-accent-600: #16a34a;
+  --color-accent-700: #15803d;
+  --color-accent-800: #166534;
+  --color-accent-900: #14532d;
+
+  /* ---------------------------------------------------------
+     Font
+     --------------------------------------------------------- */
+
+  --font-sans: "Inter", system-ui, sans-serif;
+
+  /* ---------------------------------------------------------
+     Shadows
+     --------------------------------------------------------- */
+
+  --shadow-card:
+    0 1px 3px rgba(0, 0, 0, 0.12),
+    0 1px 2px rgba(0, 0, 0, 0.24);
+
+  --shadow-card-hover:
+    0 10px 20px rgba(0, 0, 0, 0.19),
+    0 6px 6px rgba(0, 0, 0, 0.23);
+
+  --shadow-premium:
+    0 20px 60px rgba(0, 0, 0, 0.08),
+    0 8px 20px rgba(0, 0, 0, 0.06);
+
+  /* ---------------------------------------------------------
+     Border Radius
+     --------------------------------------------------------- */
+
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+
+  /* ---------------------------------------------------------
+     Animations
+     --------------------------------------------------------- */
+
+  --animate-fade-in: fadeIn 0.5s ease-in-out;
+  --animate-slide-in: slideIn 0.3s ease-out;
+
+  --animate-pulse-slow:
+    pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+
+  /* ---------------------------------------------------------
+     Keyframes
+     --------------------------------------------------------- */
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateX(-100%);
+    }
+
+    to {
+      transform: translateX(0);
+    }
+  }
+}
+
+/* =========================================================
+   DARK MODE
+   ========================================================= */
+
+/*
+  Tailwind v4 does not need:
+
+  darkMode: "class"
+
+  Instead, we define the dark variant here.
+*/
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* =========================================================
+   BASE STYLES
+   ========================================================= */
+
+@layer base {
+  html {
+    font-family: "Inter", system-ui, sans-serif;
+  }
+
+  body {
+    @apply bg-gray-50 text-gray-900 antialiased;
+    @apply dark:bg-gray-900 dark:text-gray-100;
+
+    margin: 0;
+    min-width: 320px;
+  }
+
+  /*
+    Better box sizing
+  */
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  /*
+    Remove default margin
+  */
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p {
+    margin: 0;
+  }
+
+  /*
+    Buttons and inputs inherit the font
+  */
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
+
+  /*
+    Better button cursor
+  */
+
+  button {
+    cursor: pointer;
+  }
+
+  /*
+    Custom scrollbar
+  */
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-gray-100 dark:bg-gray-800;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-gray-400 dark:bg-gray-600;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-500 dark:bg-gray-500;
+  }
+}
+
+/* =========================================================
+   REUSABLE COMPONENTS
+   ========================================================= */
+
+@layer components {
+  /* ---------------------------------------------------------
+     Card
+     --------------------------------------------------------- */
+
+  .card {
+    @apply rounded-2xl bg-white shadow-card;
+    @apply transition-shadow duration-300;
+    @apply hover:shadow-card-hover;
+    @apply dark:bg-gray-800;
+  }
+
+  /* ---------------------------------------------------------
+     Premium Card
+     --------------------------------------------------------- */
+
+  .card-premium {
+    @apply rounded-2xl bg-white shadow-premium;
+    @apply dark:bg-gray-800;
+  }
+
+  /* ---------------------------------------------------------
+     Primary Button
+     --------------------------------------------------------- */
+
+  .btn-primary {
+    @apply rounded-xl bg-primary-500;
+    @apply px-4 py-2;
+    @apply font-semibold text-white;
+    @apply transition-all duration-200;
+    @apply hover:scale-105;
+    @apply hover:bg-primary-600;
+    @apply hover:shadow-lg;
+  }
+
+  /* ---------------------------------------------------------
+     Secondary Button
+     --------------------------------------------------------- */
+
+  .btn-secondary {
+    @apply rounded-xl bg-gray-200;
+    @apply px-4 py-2;
+    @apply font-semibold text-gray-700;
+    @apply transition-all duration-200;
+    @apply hover:bg-gray-300;
+    @apply dark:bg-gray-700;
+    @apply dark:text-gray-200;
+    @apply dark:hover:bg-gray-600;
+  }
+
+  /* ---------------------------------------------------------
+     Danger Button
+     --------------------------------------------------------- */
+
+  .btn-danger {
+    @apply rounded-xl bg-red-500;
+    @apply px-4 py-2;
+    @apply font-semibold text-white;
+    @apply transition-all duration-200;
+    @apply hover:bg-red-600;
+  }
+
+  /* ---------------------------------------------------------
+     Input
+     --------------------------------------------------------- */
+
+  .input-field {
+    @apply w-full rounded-xl;
+    @apply border border-gray-300;
+    @apply bg-white;
+    @apply px-4 py-2;
+    @apply text-gray-900;
+    @apply transition-all duration-200;
+
+    @apply placeholder:text-gray-400;
+
+    @apply focus:border-primary-500;
+    @apply focus:outline-none;
+    @apply focus:ring-2;
+    @apply focus:ring-primary-500;
+
+    @apply dark:border-gray-600;
+    @apply dark:bg-gray-700;
+    @apply dark:text-white;
+  }
+
+  /* ---------------------------------------------------------
+     Badge
+     --------------------------------------------------------- */
+
+  .badge {
+    @apply rounded-full;
+    @apply px-3 py-1;
+    @apply text-sm font-medium;
+  }
+
+  /* ---------------------------------------------------------
+     Income Badge
+     --------------------------------------------------------- */
+
+  .badge-income {
+    @apply bg-green-100 text-green-700;
+    @apply dark:bg-green-900/30 dark:text-green-400;
+  }
+
+  /* ---------------------------------------------------------
+     Expense Badge
+     --------------------------------------------------------- */
+
+  .badge-expense {
+    @apply bg-red-100 text-red-700;
+    @apply dark:bg-red-900/30 dark:text-red-400;
+  }
+}
