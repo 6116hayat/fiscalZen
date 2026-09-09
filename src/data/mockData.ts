@@ -3,9 +3,7 @@ import type { Transaction } from "../types";
 import { v4 as uuidv4 } from "uuid";
 
 export const generateMockData = (): Transaction[] => {
-  const now = new Date();
   const transactions: Transaction[] = [
-    // Income
     {
       id: uuidv4(),
       date: "2026-09-01",
@@ -13,6 +11,7 @@ export const generateMockData = (): Transaction[] => {
       category: "Salary",
       amount: 45000,
       type: "INCOME",
+      tags: ["salary", "job", "monthly"],
       createdAt: "2026-09-01T00:00:00Z",
       updatedAt: "2026-09-01T00:00:00Z",
     },
@@ -23,6 +22,7 @@ export const generateMockData = (): Transaction[] => {
       category: "Freelance",
       amount: 7500,
       type: "INCOME",
+      tags: ["freelance", "website", "design"],
       createdAt: "2026-09-05T00:00:00Z",
       updatedAt: "2026-09-05T00:00:00Z",
     },
@@ -33,6 +33,7 @@ export const generateMockData = (): Transaction[] => {
       category: "Investment",
       amount: 1200,
       type: "INCOME",
+      tags: ["investment", "stocks", "dividend"],
       createdAt: "2026-09-10T00:00:00Z",
       updatedAt: "2026-09-10T00:00:00Z",
     },
@@ -43,10 +44,10 @@ export const generateMockData = (): Transaction[] => {
       category: "Gift",
       amount: 5000,
       type: "INCOME",
+      tags: ["gift", "birthday", "family"],
       createdAt: "2026-09-15T00:00:00Z",
       updatedAt: "2026-09-15T00:00:00Z",
     },
-    // Expenses
     {
       id: uuidv4(),
       date: "2026-09-02",
@@ -54,6 +55,7 @@ export const generateMockData = (): Transaction[] => {
       category: "Food",
       amount: 1240.5,
       type: "EXPENSE",
+      tags: ["grocery", "shopping", "weekly"],
       createdAt: "2026-09-02T00:00:00Z",
       updatedAt: "2026-09-02T00:00:00Z",
     },
@@ -64,6 +66,7 @@ export const generateMockData = (): Transaction[] => {
       category: "Transport",
       amount: 430.0,
       type: "EXPENSE",
+      tags: ["uber", "office", "travel"],
       createdAt: "2026-09-03T00:00:00Z",
       updatedAt: "2026-09-03T00:00:00Z",
     },
@@ -74,6 +77,7 @@ export const generateMockData = (): Transaction[] => {
       category: "Entertainment",
       amount: 649.0,
       type: "EXPENSE",
+      tags: ["netflix", "subscription", "streaming"],
       createdAt: "2026-09-04T00:00:00Z",
       updatedAt: "2026-09-04T00:00:00Z",
     },
@@ -84,6 +88,7 @@ export const generateMockData = (): Transaction[] => {
       category: "Bills",
       amount: 2100.0,
       type: "EXPENSE",
+      tags: ["electricity", "utility", "monthly"],
       createdAt: "2026-09-06T00:00:00Z",
       updatedAt: "2026-09-06T00:00:00Z",
     },
@@ -94,6 +99,7 @@ export const generateMockData = (): Transaction[] => {
       category: "Shopping",
       amount: 2350.0,
       type: "EXPENSE",
+      tags: ["amazon", "electronics", "online"],
       createdAt: "2026-09-07T00:00:00Z",
       updatedAt: "2026-09-07T00:00:00Z",
     },
@@ -104,6 +110,7 @@ export const generateMockData = (): Transaction[] => {
       category: "Health",
       amount: 3200.0,
       type: "EXPENSE",
+      tags: ["dentist", "health", "medical"],
       createdAt: "2026-09-08T00:00:00Z",
       updatedAt: "2026-09-08T00:00:00Z",
     },
@@ -114,6 +121,7 @@ export const generateMockData = (): Transaction[] => {
       category: "Education",
       amount: 1500.0,
       type: "EXPENSE",
+      tags: ["course", "learning", "education"],
       createdAt: "2026-09-09T00:00:00Z",
       updatedAt: "2026-09-09T00:00:00Z",
     },
@@ -124,6 +132,7 @@ export const generateMockData = (): Transaction[] => {
       category: "Food",
       amount: 850.0,
       type: "EXPENSE",
+      tags: ["restaurant", "dinner", "food"],
       createdAt: "2026-09-11T00:00:00Z",
       updatedAt: "2026-09-11T00:00:00Z",
     },
@@ -134,6 +143,7 @@ export const generateMockData = (): Transaction[] => {
       category: "Transport",
       amount: 1800.0,
       type: "EXPENSE",
+      tags: ["gas", "fuel", "car"],
       createdAt: "2026-09-12T00:00:00Z",
       updatedAt: "2026-09-12T00:00:00Z",
     },
@@ -144,6 +154,7 @@ export const generateMockData = (): Transaction[] => {
       category: "Bills",
       amount: 999.0,
       type: "EXPENSE",
+      tags: ["mobile", "phone", "monthly"],
       createdAt: "2026-09-13T00:00:00Z",
       updatedAt: "2026-09-13T00:00:00Z",
     },
@@ -154,12 +165,12 @@ export const generateMockData = (): Transaction[] => {
       category: "Entertainment",
       amount: 600.0,
       type: "EXPENSE",
+      tags: ["movie", "cinema", "weekend"],
       createdAt: "2026-09-14T00:00:00Z",
       updatedAt: "2026-09-14T00:00:00Z",
     },
   ];
 
-  // Sort by date (newest first)
   return transactions.sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   );
