@@ -186,7 +186,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
       filtered = filtered.filter(
         (t) =>
           t.description.toLowerCase().includes(search) ||
-          t.category.toLowerCase().includes(search),
+          t.category.toLowerCase().includes(search) ||
+          t.tags?.some((tag) => tag.toLowerCase().includes(search)),
       );
     }
 

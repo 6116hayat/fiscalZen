@@ -8,6 +8,7 @@ export interface Transaction {
   category: string;
   amount: number;
   type: TransactionType;
+  tags: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -18,6 +19,7 @@ export interface TransactionInput {
   category: string;
   amount: number;
   type: TransactionType;
+  tags: string[];
 }
 
 export interface Summary {
