@@ -7,9 +7,10 @@ import {
   TrendingUp,
   TrendingDown,
   ChevronDown,
-  ChevronUp,
+  // ChevronUp,
 } from "lucide-react";
 import { useApp } from "../../state/AppState";
+import { useToast } from "../common/Toast";
 import {
   formatCurrency,
   formatDate,
@@ -26,14 +27,16 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
   transactions,
   onEdit,
 }) => {
-  const { state, deleteTransaction } = useApp();
+  // const { state, deleteTransaction } = useApp();/
+  const { state, requestDelete } = useApp();
+  const { showToast } = useToast();
+
   const { role } = state;
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const handleDelete = (id: string) => {
-    if (window.confirm("Are you sure you want to delete this transaction?")) {
-      deleteTransaction(id);
-    }
+    requestDelete(id);
+    showToast("Transaction deleted successfully", "success");
   };
 
   if (transactions.length === 0) {
@@ -65,6 +68,7 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
               Category
             </th>
+
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
               Tags
             </th>
