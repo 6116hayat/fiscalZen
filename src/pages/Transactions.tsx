@@ -2,15 +2,20 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { useApp } from "../state/AppState";
+import { useToast } from "../components/common/Toast";
 import { TransactionFilters } from "../components/transactions/TransactionsFilters";
 import { TransactionTable } from "../components/transactions/TransactionTable";
 import { TransactionSort } from "../components/transactions/TransactionSort";
 import { TransactionActions } from "../components/transactions/TransactionActions";
 import { TransactionForm } from "../components/transactions/TransactionForm";
+import { ExportButton } from "../components/transactions/ExportButton";
+import { ConfirmModal } from "../components/common/ConfirmModal";
+
 import type { Transaction } from "../types";
 
 export const Transactions: React.FC = () => {
-  const { getFilteredTransactions } = useApp();
+  const { state, dispatch, getFilteredTransactions, confirmDelete } = useApp();
+  const { showToast } = useToast();
   const [modalOpen, setModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] =
     useState<Transaction | null>(null);
@@ -32,6 +37,21 @@ export const Transactions: React.FC = () => {
     setEditingTransaction(null);
   };
 
+  const handleFormSuccess = (message: string) => {
+    showToast(message, "success");
+  };
+
+  const handleConfirmDelete = () => {
+    confirmDelete();
+  };
+
+  const handleCancelDelete = () => {
+    dispatch({
+      type: "SET_CONFIRM_MODAL",
+      payload: { isOpen: false, transactionId: null },
+    });
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -48,7 +68,10 @@ export const Transactions: React.FC = () => {
             {filteredTransactions.length} transactions found
           </p>
         </div>
-        <TransactionActions onAdd={handleAdd} />
+        <div className="flex items-center gap-3">
+          <ExportButton />
+          <TransactionActions onAdd={handleAdd} />
+        </div>
       </motion.div>
 
       {/* Filters */}
@@ -86,6 +109,18 @@ export const Transactions: React.FC = () => {
         isOpen={modalOpen}
         onClose={handleCloseModal}
         editTransaction={editingTransaction}
+        onSuccess={handleFormSuccess}
+      />
+
+      {/* confirmModal */}
+      <ConfirmModal
+        isOpen={state.confirmModal.isOpen}
+        title="Delete Transaction"
+        message="Are you sure you want to delete this transaction? This action cannot be undone."
+        confirmText="Delete"
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+        variant="danger"
       />
     </div>
   );

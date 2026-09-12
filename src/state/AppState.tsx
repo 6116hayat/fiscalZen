@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer } from "react";
+import React, { createContext, useContext, useReducer, useEffect } from "react";
 import type { ReactNode } from "react";
 import type { Transaction, TransactionFilters, SortOption } from "../types";
 import { generateMockData } from "../data/mockData";
@@ -13,6 +13,10 @@ interface AppState {
   modal: {
     isOpen: boolean;
     mode: "add" | "edit" | null;
+    transactionId: string | null;
+  };
+  confirmModal: {
+    isOpen: boolean;
     transactionId: string | null;
   };
   isLoading: boolean;
@@ -36,12 +40,35 @@ type AppAction =
         transactionId?: string | null;
       };
     }
+  | {
+      type: "SET_CONFIRM_MODAL";
+      payload: {
+        isOpen: boolean;
+        transactionId?: string | null;
+      };
+    }
   | { type: "SET_LOADING"; payload: boolean }
-  | { type: "SET_ERROR"; payload: string | null };
+  | { type: "SET_ERROR"; payload: string | null }
+  | { type: "RESET_DATA" };
 
 // Initial State
+const getInitialTransactions = (): Transaction[] => {
+  try {
+    const stored = localStorage.getItem("finance_transactions");
+    if (stored) {
+      const parsed = JSON.parse(stored) as Transaction[];
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+  } catch (error) {
+    console.warn("Failed to load transactions from localStorage:", error);
+  }
+  return generateMockData();
+};
+
 const initialState: AppState = {
-  transactions: generateMockData(),
+  transactions: getInitialTransactions(),
   role: "viewer",
   filters: {
     search: "",
@@ -52,6 +79,10 @@ const initialState: AppState = {
   modal: {
     isOpen: false,
     mode: null,
+    transactionId: null,
+  },
+  confirmModal: {
+    isOpen: false,
     transactionId: null,
   },
   isLoading: false,
@@ -103,11 +134,23 @@ function appReducer(state: AppState, action: AppAction): AppState {
         },
       };
 
+    case "SET_CONFIRM_MODAL":
+      return {
+        ...state,
+        confirmModal: {
+          isOpen: action.payload.isOpen,
+          transactionId: action.payload.transactionId ?? null,
+        },
+      };
+
     case "SET_LOADING":
       return { ...state, isLoading: action.payload };
 
     case "SET_ERROR":
       return { ...state, error: action.payload };
+
+    case "RESET_DATA":
+      return { ...initialState, transactions: generateMockData() };
 
     default:
       return state;
@@ -123,7 +166,9 @@ interface AppContextType {
     transaction: Omit<Transaction, "id" | "createdAt" | "updatedAt">,
   ) => void;
   updateTransaction: (id: string, transaction: Partial<Transaction>) => void;
-  deleteTransaction: (id: string) => void;
+  // deleteTransaction: (id: string) => void;
+  requestDelete: (id: string) => void;
+  confirmDelete: () => void;
   getFilteredTransactions: () => Transaction[];
   getSummary: () => {
     balance: number;
@@ -142,6 +187,23 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [state, dispatch] = useReducer(appReducer, initialState);
+
+  //persist transactions to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        "finance_transactions",
+        JSON.stringify(state.transactions),
+      );
+    } catch (error) {
+      console.warn("Failed to save transactions:", error);
+    }
+  }, [state.transactions]);
+
+  //persist role
+  useEffect(() => {
+    localStorage.setItem("finance_role", state.role);
+  }, [state.role]);
 
   // Helper: Add transaction
   const addTransaction = (
@@ -170,10 +232,31 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   // Helper: Delete transaction
-  const deleteTransaction = (id: string) => {
-    if (confirm("Are you sure you want to delete this transaction?")) {
-      dispatch({ type: "DELETE_TRANSACTION", payload: id });
+  // const deleteTransaction = (id: string) => {
+  //   if (confirm("Are you sure you want to delete this transaction?")) {
+  //     dispatch({ type: "DELETE_TRANSACTION", payload: id });
+  //   }
+  // };
+
+  // Confirm-based delete (two-step)
+  const requestDelete = (id: string) => {
+    dispatch({
+      type: "SET_CONFIRM_MODAL",
+      payload: { isOpen: true, transactionId: id },
+    });
+  };
+
+  const confirmDelete = () => {
+    if (state.confirmModal.transactionId) {
+      dispatch({
+        type: "DELETE_TRANSACTION",
+        payload: state.confirmModal.transactionId,
+      });
     }
+    dispatch({
+      type: "SET_CONFIRM_MODAL",
+      payload: { isOpen: false, transactionId: null },
+    });
   };
 
   // Helper: Get filtered and sorted transactions
@@ -291,7 +374,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
     });
 
     // Largest expense
-    const largestExpense = expenses.sort((a, b) => b.amount - a.amount)[0];
+    const largestExpense = [...expenses].sort((a, b) => b.amount - a.amount)[0];
     if (largestExpense) {
       insights.push({
         id: "insight_3",
@@ -323,7 +406,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
     dispatch,
     addTransaction,
     updateTransaction,
-    deleteTransaction,
+    // deleteTransaction,
+    requestDelete,
+    confirmDelete,
     getFilteredTransactions,
     getSummary,
     getInsights,

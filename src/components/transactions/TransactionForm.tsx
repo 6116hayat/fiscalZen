@@ -28,12 +28,14 @@ interface TransactionFormProps {
   isOpen: boolean;
   onClose: () => void;
   editTransaction?: Transaction | null;
+  onSuccess?: (message: string) => void;
 }
 
 export const TransactionForm: React.FC<TransactionFormProps> = ({
   isOpen,
   onClose,
   editTransaction,
+  onSuccess,
 }) => {
   const { addTransaction, updateTransaction } = useApp();
   const isEdit = !!editTransaction;
@@ -98,8 +100,10 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
 
     if (isEdit && editTransaction) {
       updateTransaction(editTransaction.id, transactionData);
+      onSuccess?.("Transaction updated successfully");
     } else {
       addTransaction(transactionData);
+      onSuccess?.("Transaction added successfully");
     }
 
     onClose();
