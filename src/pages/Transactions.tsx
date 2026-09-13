@@ -11,11 +11,18 @@ import { TransactionForm } from "../components/transactions/TransactionForm";
 import { ExportButton } from "../components/transactions/ExportButton";
 import { ConfirmModal } from "../components/common/ConfirmModal";
 
+import { usePermissions } from "../hooks/usePermissions";
+import { Eye } from "lucide-react";
+
 import type { Transaction } from "../types";
 
 export const Transactions: React.FC = () => {
   const { state, dispatch, getFilteredTransactions, confirmDelete } = useApp();
   const { showToast } = useToast();
+
+  //Viewer Mode
+  const { isViewer } = usePermissions();
+
   const [modalOpen, setModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] =
     useState<Transaction | null>(null);
@@ -43,6 +50,7 @@ export const Transactions: React.FC = () => {
 
   const handleConfirmDelete = () => {
     confirmDelete();
+    showToast("Transaction deleted successfully", "success");
   };
 
   const handleCancelDelete = () => {
@@ -73,6 +81,22 @@ export const Transactions: React.FC = () => {
           <TransactionActions onAdd={handleAdd} />
         </div>
       </motion.div>
+
+      {/* Viewer Mode: informational banner shown only to viewer */}
+      {isViewer && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800"
+        >
+          <Eye className="w-5 h-5 text-blue-500 flex-shrink-0" />
+          <p className="text-sm text-blue-700 dark:text-blue-300">
+            You're viewing in <strong>Viewer mode</strong>. Switch to{" "}
+            <strong>Admin</strong> in the header to add, edit, or delete
+            transactions.
+          </p>
+        </motion.div>
+      )}
 
       {/* Filters */}
       <motion.div

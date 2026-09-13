@@ -10,7 +10,6 @@ import {
   // ChevronUp,
 } from "lucide-react";
 import { useApp } from "../../state/AppState";
-import { useToast } from "../common/Toast";
 import {
   formatCurrency,
   formatDate,
@@ -29,14 +28,12 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
 }) => {
   // const { state, deleteTransaction } = useApp();/
   const { state, requestDelete } = useApp();
-  const { showToast } = useToast();
 
   const { role } = state;
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const handleDelete = (id: string) => {
     requestDelete(id);
-    showToast("Transaction deleted successfully", "success");
   };
 
   if (transactions.length === 0) {

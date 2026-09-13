@@ -11,6 +11,7 @@ import {
   Moon,
   User,
   Shield,
+  Eye,
   ChevronLeft,
   Menu,
 } from "lucide-react";
@@ -111,8 +112,14 @@ export const Layout: React.FC = () => {
                   <p className="text-sm font-medium text-gray-800 dark:text-white">
                     {state.role === "admin" ? "Admin User" : "Viewer User"}
                   </p>
+                  {/* ROLE ICON: Shield for Admin, Eye for Viewer */}
                   <div className="flex items-center space-x-1">
-                    <Shield className="w-3 h-3 text-primary-500" />
+                    {state.role === "admin" ? (
+                      <Shield className="w-3 h-3 text-primary-500" />
+                    ) : (
+                      <Eye className="w-3 h-3 text-blue-500" />
+                    )}
+
                     <span className="text-xs text-gray-500 dark:text-gray-400 capitalize">
                       {state.role}
                     </span>
@@ -141,11 +148,14 @@ export const Layout: React.FC = () => {
           </div>
 
           <div className="flex items-center space-x-4">
-            {/* Role Selector */}
-            <div className="flex items-center space-x-2">
-              <span className="text-sm text-gray-500 dark:text-gray-400">
-                Role:
-              </span>
+            {/* ROLE SELECTOR: shows Shield for Admin and Eye for Viewer */}
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-gray-700 rounded-xl">
+              {state.role === "admin" ? (
+                <Shield className="w-3 h-3 text-primary-500" />
+              ) : (
+                <Eye className="w-3 h-3 text-blue-500" />
+              )}
+
               <select
                 value={state.role}
                 onChange={(e) =>
@@ -154,7 +164,7 @@ export const Layout: React.FC = () => {
                     payload: e.target.value as "viewer" | "admin",
                   })
                 }
-                className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-700 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="bg-transparent text-sm font-medium text-gray-700 dark:text-white focus:outline-none cursor-pointer"
               >
                 <option value="viewer">Viewer</option>
                 <option value="admin">Admin</option>
