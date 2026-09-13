@@ -1,6 +1,12 @@
 import React, { createContext, useContext, useReducer, useEffect } from "react";
 import type { ReactNode } from "react";
-import type { Transaction, TransactionFilters, SortOption } from "../types";
+import type {
+  Transaction,
+  TransactionFilters,
+  SortOption,
+  Insight,
+} from "../types";
+import { calculateInsights } from "../utils/insights";
 import { generateMockData } from "../data/mockData";
 import { v4 as uuidv4 } from "uuid";
 
@@ -161,15 +167,21 @@ function appReducer(state: AppState, action: AppAction): AppState {
 interface AppContextType {
   state: AppState;
   dispatch: React.Dispatch<AppAction>;
+
   // Helper functions
   addTransaction: (
     transaction: Omit<Transaction, "id" | "createdAt" | "updatedAt">,
   ) => void;
+
   updateTransaction: (id: string, transaction: Partial<Transaction>) => void;
+
   // deleteTransaction: (id: string) => void;
+
   requestDelete: (id: string) => void;
   confirmDelete: () => void;
+
   getFilteredTransactions: () => Transaction[];
+
   getSummary: () => {
     balance: number;
     income: number;
@@ -177,7 +189,8 @@ interface AppContextType {
     savings: number;
     count: number;
   };
-  getInsights: () => any[];
+
+  getInsights: () => Insight[];
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -209,6 +222,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
   const addTransaction = (
     transaction: Omit<Transaction, "id" | "createdAt" | "updatedAt">,
   ) => {
+    if (state.role !== "admin") {
+      console.warn("Permission denied: only admins can add transactions");
+      return;
+    }
+
     const newTransaction: Transaction = {
       ...transaction,
       id: uuidv4(),
@@ -220,6 +238,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
 
   // Helper: Update transaction
   const updateTransaction = (id: string, transaction: Partial<Transaction>) => {
+    if (state.role !== "admin") {
+      console.warn("Permission denied: only admins can edit transactions");
+      return;
+    }
+
     const existing = state.transactions.find((t) => t.id === id);
     if (!existing) return;
 
@@ -240,6 +263,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
 
   // Confirm-based delete (two-step)
   const requestDelete = (id: string) => {
+    if (state.role !== "admin") {
+      console.warn("Permission denied: only admins can delete transactions");
+      return;
+    }
+
     dispatch({
       type: "SET_CONFIRM_MODAL",
       payload: { isOpen: true, transactionId: id },
@@ -327,79 +355,81 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   // Helper: Get insights
-  const getInsights = () => {
-    const transactions = state.transactions;
-    const expenses = transactions.filter((t) => t.type === "EXPENSE");
-    const income = transactions.filter((t) => t.type === "INCOME");
+  // const getInsights = () => {
+  //   const transactions = state.transactions;
+  //   const expenses = transactions.filter((t) => t.type === "EXPENSE");
+  //   const income = transactions.filter((t) => t.type === "INCOME");
 
-    const totalExpenses = expenses.reduce((sum, t) => sum + t.amount, 0);
-    const totalIncome = income.reduce((sum, t) => sum + t.amount, 0);
-    const insights = [];
+  //   const totalExpenses = expenses.reduce((sum, t) => sum + t.amount, 0);
+  //   const totalIncome = income.reduce((sum, t) => sum + t.amount, 0);
+  //   const insights = [];
 
-    // Highest spending category
-    const categorySpending = expenses.reduce(
-      (acc, t) => {
-        acc[t.category] = (acc[t.category] || 0) + t.amount;
-        return acc;
-      },
-      {} as Record<string, number>,
-    );
+  //   // Highest spending category
+  //   const categorySpending = expenses.reduce(
+  //     (acc, t) => {
+  //       acc[t.category] = (acc[t.category] || 0) + t.amount;
+  //       return acc;
+  //     },
+  //     {} as Record<string, number>,
+  //   );
 
-    const highestCategory = Object.entries(categorySpending).sort(
-      (a, b) => b[1] - a[1],
-    )[0];
+  //   const highestCategory = Object.entries(categorySpending).sort(
+  //     (a, b) => b[1] - a[1],
+  //   )[0];
 
-    if (highestCategory) {
-      insights.push({
-        id: "insight_1",
-        title: "Highest Spending Category",
-        description: `${highestCategory[0]} is your highest spending category.`,
-        type: "HIGHEST_SPENDING",
-        value: highestCategory[1],
-        category: highestCategory[0],
-      });
-    }
+  //   if (highestCategory) {
+  //     insights.push({
+  //       id: "insight_1",
+  //       title: "Highest Spending Category",
+  //       description: `${highestCategory[0]} is your highest spending category.`,
+  //       type: "HIGHEST_SPENDING",
+  //       value: highestCategory[1],
+  //       category: highestCategory[0],
+  //     });
+  //   }
 
-    // Savings rate
-    const savings = totalIncome - totalExpenses;
-    const savingsRate = totalIncome > 0 ? (savings / totalIncome) * 100 : 0;
+  //   // Savings rate
+  //   const savings = totalIncome - totalExpenses;
+  //   const savingsRate = totalIncome > 0 ? (savings / totalIncome) * 100 : 0;
 
-    insights.push({
-      id: "insight_2",
-      title: "Savings Rate",
-      description: `You're saving ${savingsRate.toFixed(1)}% of your income.`,
-      type: "SAVINGS_RATE",
-      percentage: savingsRate,
-      value: savings,
-    });
+  //   insights.push({
+  //     id: "insight_2",
+  //     title: "Savings Rate",
+  //     description: `You're saving ${savingsRate.toFixed(1)}% of your income.`,
+  //     type: "SAVINGS_RATE",
+  //     percentage: savingsRate,
+  //     value: savings,
+  //   });
 
-    // Largest expense
-    const largestExpense = [...expenses].sort((a, b) => b.amount - a.amount)[0];
-    if (largestExpense) {
-      insights.push({
-        id: "insight_3",
-        title: "Largest Expense",
-        description: `${largestExpense.description} — ₹${largestExpense.amount.toFixed(2)}`,
-        type: "LARGEST_EXPENSE",
-        value: largestExpense.amount,
-        category: largestExpense.category,
-      });
-    }
+  //   // Largest expense
+  //   const largestExpense = [...expenses].sort((a, b) => b.amount - a.amount)[0];
+  //   if (largestExpense) {
+  //     insights.push({
+  //       id: "insight_3",
+  //       title: "Largest Expense",
+  //       description: `${largestExpense.description} — ₹${largestExpense.amount.toFixed(2)}`,
+  //       type: "LARGEST_EXPENSE",
+  //       value: largestExpense.amount,
+  //       category: largestExpense.category,
+  //     });
+  //   }
 
-    // Monthly comparison (simplified)
-    insights.push({
-      id: "insight_4",
-      title: "Monthly Comparison",
-      description:
-        totalExpenses > 0
-          ? `Your expenses are ${totalExpenses > 10000 ? "higher" : "lower"} than the average month.`
-          : "No expenses recorded this month.",
-      type: "MONTHLY_COMPARISON",
-      percentage: totalExpenses > 0 ? 8 : 0,
-    });
+  //   // Monthly comparison (simplified)
+  //   insights.push({
+  //     id: "insight_4",
+  //     title: "Monthly Comparison",
+  //     description:
+  //       totalExpenses > 0
+  //         ? `Your expenses are ${totalExpenses > 10000 ? "higher" : "lower"} than the average month.`
+  //         : "No expenses recorded this month.",
+  //     type: "MONTHLY_COMPARISON",
+  //     percentage: totalExpenses > 0 ? 8 : 0,
+  //   });
 
-    return insights;
-  };
+  //   return insights;
+  // };
+
+  const getInsights = () => calculateInsights(state.transactions);
 
   const value = {
     state,
